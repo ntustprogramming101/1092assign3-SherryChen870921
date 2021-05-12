@@ -20,11 +20,6 @@ final float LIFE_MAX = 5;
 final float LIFE_Y = 10;
 final float LIFE_X_START = 10;
 
-final float SOLDIER_W = 80, SOLDIER_H = 80;
-final float SOLDIER_SPEED = 5;
-
-final float CABBAGE_W = 80, CABBAGE_H = 80;
-
 final float GROUNDHOG_INIT_X = OFFSET_X*4;
 final float GROUNDHOG_INIT_Y = OFFSET_Y;
 final float GROUNDHOG_W = 80;
@@ -33,12 +28,8 @@ final float GROUNDHOG_SPEED = round(80/15);
 
 PImage title, gameover, startNormal, startHovered, restartNormal, restartHovered;
 PImage groundhogIdle, groundhogDown, groundhogLeft, groundhogRight;
-PImage bg, life, cabbage, soldier, stone1, stone2;
+PImage bg, life, stone1, stone2;
 PImage [] soil;
-
-float cabbageX, cabbageY;
-
-float soldierX, soldierY;
 
 float groundhogX = OFFSET_X*4;
 float groundhogY = OFFSET_Y;
@@ -99,12 +90,6 @@ void setup() { //480
   
   stone1 = loadImage("img/stone1.png");
   stone2 = loadImage("img/stone2.png");
-  
-  soldierX = -80;
-  soldierY = row[floor(random(4))];
-  
-  cabbageX = col[floor(random(8))];
-  cabbageY = row[floor(random(4))];
   
   groundhogX = GROUNDHOG_INIT_X;
   groundhogY = GROUNDHOG_INIT_Y;
@@ -180,7 +165,7 @@ void draw() {
       }
     }
     
-    // Soil - REPLACE THIS PART WITH YOUR LOOP CODE!
+    // Soil
     for(int x = 0; x < 8; x++){
       soils = 0;
       for(int y = 0; y < 24; y++){
@@ -198,7 +183,8 @@ void draw() {
     
     // Stone 1-16
     for(int y = 0; y < 16; y++){
-      if(y < 8){ // Stone 1-8
+    // Stone 1-8
+      if(y < 8){ 
         image(stone1, y * 80, row[y]); 
         
       }else if(y < 16){ // Stone 9-16
