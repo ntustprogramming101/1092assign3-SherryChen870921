@@ -1,6 +1,3 @@
-final float OFFSET_X = 80, OFFSET_Y = 80;
-final int TWENTY_FLOOR = 1600;
-
 final int GAME_START = 0, GAME_RUN = 1, GAME_OVER = 2;
 int gameState = GAME_START;
 
@@ -15,33 +12,34 @@ final int START_BUTTON_H = 60;
 final int START_BUTTON_X = 248;
 final int START_BUTTON_Y = 360;
 
-final float LIFE_SPACE = 70;
 final float LIFE_MAX = 5;
 final float LIFE_Y = 10;
 final float LIFE_X_START = 10;
 
-final float GROUNDHOG_INIT_X = OFFSET_X*4;
-final float GROUNDHOG_INIT_Y = OFFSET_Y;
 final float GROUNDHOG_W = 80;
 final float GROUNDHOG_H = 80;
 final float GROUNDHOG_SPEED = round(80/15);
 
 PImage title, gameover, startNormal, startHovered, restartNormal, restartHovered;
 PImage groundhogIdle, groundhogDown, groundhogLeft, groundhogRight;
-PImage bg, life, stone1, stone2;
-PImage [] soil;
+PImage bg, life;
 
-float groundhogX = OFFSET_X*4;
-float groundhogY = OFFSET_Y;
+PImage soil0, soil1, soil2, soil3, soil4, soil5;
+float soilY = 160;
+
+PImage stone1, stone2;
+
+int stoneX = 0;
+float stoneY = 0;
+
+float groundhogX = 80*4;
+float groundhogY = 80;
 float groundhog_count;
 
 float screen_Y_Offset;
 float screen_Y_Count;
 
 int soils = 0;
-
-int [] col;
-int [] row;
 
 int lifeX, lifeY;
 
@@ -63,26 +61,15 @@ void setup() { //480
   startHovered = loadImage("img/startHovered.png");
   restartNormal = loadImage("img/restartNormal.png");
   restartHovered = loadImage("img/restartHovered.png");
-  
-  soil = new PImage[6];
-  for(int i = 0; i < 6; i++){
-     soil[i] = loadImage("img/soil"+i+".png");
-  }
-  
-  col = new int [8];
-  for(int x = 0; x < 8; x++){
-    col[x] = x*80;
-  }
-  
-  row = new int [24];
-  for(int y = 0; y < 24; y++){
-    row[y] = 160 + y*80;
-  }
-  
+  soil0 = loadImage("img/soil0.png");
+  soil1 = loadImage("img/soil1.png");
+  soil2 = loadImage("img/soil2.png");
+  soil3 = loadImage("img/soil3.png");
+  soil4 = loadImage("img/soil4.png");
+  soil5 = loadImage("img/soil5.png");
+  stone1 = loadImage("img/stone1.png");
+  stone2 = loadImage("img/stone2.png");
   life = loadImage("img/life.png");
-  soldier = loadImage("img/soldier.png");
-  cabbage = loadImage("img/cabbage.png");
-  
   groundhogIdle = loadImage("img/groundhogIdle.png");
   groundhogDown = loadImage("img/groundhogDown.png");
   groundhogRight = loadImage("img/groundhogRight.png");
@@ -91,8 +78,9 @@ void setup() { //480
   stone1 = loadImage("img/stone1.png");
   stone2 = loadImage("img/stone2.png");
   
-  groundhogX = GROUNDHOG_INIT_X;
-  groundhogY = GROUNDHOG_INIT_Y;
+  
+  groundhogX = 80*4;
+  groundhogY =80;
   groundhog_count = 0;
   
   screen_Y_Count = 0;
@@ -104,10 +92,8 @@ void setup() { //480
 
 void draw() {
     /* ------ Debug Function ------ 
-
       Please DO NOT edit the code here.
       It's for reviewing other requirements when you fail to complete the camera moving requirement.
-
     */
     if (debugMode) {
       pushMatrix();
@@ -151,78 +137,94 @@ void draw() {
     ellipse(width - 50, 50, 120, 120);
     
     
-    // Screen Scroll 
-    if(screen_Y_Offset <= TWENTY_FLOOR){
-      if(screen_Y_Count < screen_Y_Offset){
-        
-        screen_Y_Count += GROUNDHOG_SPEED;
-        cabbageY -= GROUNDHOG_SPEED;
-        soldierY -= GROUNDHOG_SPEED;
-        
-        for(int y = 0; y < 24; y++){
-           row[y] -= GROUNDHOG_SPEED;
-        }
+// Soil - REPLACE THIS PART WITH YOUR LOOP CODE!
+    for(int x=0; x<width; x+=80){
+      for(float y=soilY; y<soilY+320; y+=80){
+        image(soil0, x, y);
+      }
+      for(float y=soilY+320; y<soilY+(2*320); y+=80){
+        image(soil1, x, y);
+      }
+      for(float y=soilY+(2*320); y<soilY+(3*320); y+=80){
+        image(soil2, x, y);
+      }
+      for(float y=soilY+(3*320); y<soilY+(4*320); y+=80){
+        image(soil3, x, y);
+      }
+      for(float y=soilY+(4*320); y<soilY+(5*320); y+=80){
+        image(soil4, x, y);
+      }
+      for(float y=soilY+(5*320); y<soilY+(6*320); y+=80){
+        image(soil5, x, y);
       }
     }
     
-    // Soil
-    for(int x = 0; x < 8; x++){
-      soils = 0;
-      for(int y = 0; y < 24; y++){
-        if(y%4 == 0 && soils < 5 && y >= 4){
-          soils ++;
-        }
-        image(soil[soils], col[x], row[y]);
-      }
-    } 
+      
+    //Stone 1
+    for(int i=0; i<8; i++){
+        stoneX = i*80;
+        stoneY = soilY+i*80;
+        image(stone1, stoneX, stoneY);
+    }
     
-    // Grass
-    fill(124, 204, 25);
-    noStroke();
-    rect(0, row[0] - 15, width, 15);
-    
-    // Stone 1-16
-    for(int y = 0; y < 16; y++){
-    // Stone 1-8
-      if(y < 8){ 
-        image(stone1, y * 80, row[y]); 
-        
-      }else if(y < 16){ // Stone 9-16
-        for(int x = 0; x < 8; x++){
-          if(y == 8 || y == 11 || y == 12 || y == 15){ 
-            
-            if(x == 1 || x == 2 || x == 5 || x == 6){
-              image(stone1, x * 80, row[y]);
-            }
-          }else{
-            if(x == 0 || x == 3 || x == 4 || x == 7 ){
-              image(stone1, x * 80, row[y]);
-            }
+    //Stone 2
+    for(int i=0; i<8; i++){
+      if(i==2 || i==6){
+      stoneX = i*80;
+        for(int j=0; j<8; j++){
+          if(j==0 || j==3 || j==4 || j==7){
+            stoneY = soilY+(2*320)+j*80;
+            image(stone1, -80+stoneX, stoneY);
+            image(stone1, stoneX, stoneY);
           }
         }
       }
     }
     
-    // Stone 17-24
-    for(int x = 0; x < 15; x++){ 
-      if(x%3 != 0){                    
-         int colX = 0;
-         
-        for(int y = 16; y < 24; y++){  
-            image(stone1, colX + x*80, row[y]);
-            
-            if(x == 2 || x == 5 || x == 8|| x== 11 || x == 14){
-            image(stone2, colX + x*80, row[y]);
-            }
-            colX -= 80;
+    for(int i=0; i<8; i++){
+      if(i==0 || i==3 || i==4 || i==7){
+      stoneX = i*80;
+        for(int j=0; j<8; j++){
+          if(j==2 || j==6){
+            stoneY = soilY+(2*320)+j*80;
+            image(stone1, stoneX, stoneY-80);
+            image(stone1, stoneX, stoneY);
+          }
         }
       }
-    }  
+    }
     
+    //Stone 3
+    for(int i=0; i<8; i++){
+      stoneX = -480+(i*80);
+      stoneY = soilY+(6*320)-80-i*80;
+      image(stone1, stoneX, stoneY);
+      image(stone1, stoneX+80, stoneY);
+      image(stone1, stoneX+240, stoneY);
+      image(stone1, stoneX+320, stoneY);
+      image(stone1, stoneX+480, stoneY);
+      image(stone1, stoneX+560, stoneY);
+      image(stone1, stoneX+720, stoneY);
+      image(stone1, stoneX+800, stoneY);
+      image(stone1, stoneX+960, stoneY);
+      image(stone1, stoneX+1040, stoneY);
+      image(stone2, stoneX+80, stoneY);
+      image(stone2, stoneX+320, stoneY);
+      image(stone2, stoneX+560, stoneY);
+      image(stone2, stoneX+800, stoneY);
+      image(stone2, stoneX+1040, stoneY);
+      
+    }
+    
+   // Grass
+    fill(124, 204, 25);
+    noStroke();
+    rect(0, soilY - 15, width, 15);
+
     
     // Life
     for(int i = 0; i < playerHealth ; i++){
-      image(life, LIFE_X_START + i * LIFE_SPACE, LIFE_Y);
+      image(life, LIFE_X_START + i * 70, LIFE_Y);
     }
     
     
@@ -240,7 +242,7 @@ void draw() {
         
         if(bottonState == BOTTON_DOWN){
             
-          if(screen_Y_Offset > TWENTY_FLOOR){
+          if(screen_Y_Offset > 1600){
             groundhogY += GROUNDHOG_SPEED;
             // Border Range
             if(groundhogY + GROUNDHOG_H > height){
@@ -289,20 +291,6 @@ void draw() {
         }
     }
      
-    // Soldier Hit 
-    if(groundhogX < soldierX + SOLDIER_W   
-       && groundhogX + GROUNDHOG_W > soldierX
-       && groundhogY < soldierY + SOLDIER_H
-       && groundhogY + GROUNDHOG_H > soldierY){
-    
-      playerHealth --;
-      if(playerHealth == 0){
-        gameState = GAME_OVER;
-      }
-      setup();
-      //image(groundhogIdle, groundhogX, groundhogY);
-    }
-       
     break;
 
     case GAME_OVER: // Gameover Screen
@@ -345,7 +333,7 @@ void keyPressed(){
             bottonState = BOTTON_DOWN;
             downPressed = true;
             
-            if(screen_Y_Offset < TWENTY_FLOOR + OFFSET_Y*2){
+            if(screen_Y_Offset < 1600 + 80*2){
               screen_Y_Offset += 80;
             }
             
